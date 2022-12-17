@@ -32,6 +32,17 @@ commands:
             aws s3 rm s3://udapeople-<<parameters.Workflow_ID>> --recursive
             aws cloudformation delete-stack --stack-name udapeople-frontend-<< parameters.Workflow_ID >>
             aws cloudformation delete-stack --stack-name udapeople-backend-<< parameters.Workflow_ID >>
+  install_nodejs:
+    description: Install Node.js 13.8.0
+    steps:
+      - run:
+          name: Install Node.js 13.8.0
+          command: |
+            # Install Node.js LTS version
+            curl -fsSL https://deb.nodesource.com/setup_lts.x | sudo -E bash -
+            sudo apt install -y nodejs
+            sudo npm install --global n
+            sudo n 13.8.0
 
   revert-migrations:
     description: Revert the last migration if successfully run in the current workflow.
@@ -209,17 +220,18 @@ jobs:
 
   run-migrations:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/node:19.2.0
     steps:
       - checkout
       - install_awscli
+      - install_nodejs
       - run:
           name: Run migrations
           command: |
             cd backend
             npm install
             npm run migrations > migrations_dump.txt
-
+            cat migrations_dump.txt
       - run:
           name: Send migration results to KVDB.io
           command: |
