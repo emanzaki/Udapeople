@@ -220,11 +220,12 @@ jobs:
 
   run-migrations:
     docker:
-      - image: cimg/node:19.2.0
+      - image: cimg/node:13.8.0
     steps:
       - checkout
       - install_awscli
-      - install_nodejs
+      - restore_cache:
+          keys: [backend-build]
       - run:
           name: Run migrations
           command: |
@@ -235,7 +236,7 @@ jobs:
       - run:
           name: Send migration results to KVDB.io
           command: |
-            if grep -q "has been executed successfully." ~/project/backend/migrations_dump.txt
+            if grep -q "has been executed successfully." migrations_dump.txt
             then
                 curl https://kvdb.io/${KVDB_BUCKET}/migration_${CIRCLE_WORKFLOW_ID:0:7} -d '1'
             fi
